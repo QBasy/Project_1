@@ -5,18 +5,23 @@ const app = express();
 const port = 1337;
 const db = new Database();
 
+
 app.use(express.json());
 
 app.get('/', (req,res) => {
-    res.send('Hello');
+    res.sendFile(__dirname+'/frontend/index.html');
 });
 
-app.get('database/:apartmentName', async (req,res) => {
+app.get('/index',(req,res) => {
+    res.sendFile(__dirname+'/frontend/index.html')
+})
+
+app.get('/database/:apartmentName', async (req,res) => {
     const { apartmentName } = req.params;
 
     try {
         await db.connect();
-        const apartmentInfo = await db.getDataBy(apartmentName);
+        const apartmentInfo = await db.getDataByApartment(apartmentName);
 
         if (apartmentInfo) {
             res.json(apartmentInfo);
@@ -34,4 +39,7 @@ app.listen(port, () => {
     console.log(`Server is running on ${port}`);
 });
 
-db.createTable();
+db.connect().then(async r => {
+    await db.getDataByApartment('1')
+    await db.disconnect();
+});

@@ -3,7 +3,11 @@ const {Client} = require('pg');
 class Database {
     constructor() {
         this.client = new Client({
-            postgresSQLLoginPassword: 'jdbc:postgresql://localhost:5432/postgres',
+            user: 'postgres',
+            host: 'localhost',
+            database: 'postgres',
+            password: 'japierdole',
+            port: 5432,
         });
     }
     async connect() {
@@ -12,9 +16,6 @@ class Database {
             console.log('ЕСТЬ КОНТАК!!!');
         } catch (err) {
             console.error('Error connecting to PostgresSQL:', err);
-        } finally {
-            await this.client.end();
-            console.log('Connection closed!');
         }
     }
 
@@ -44,7 +45,7 @@ class Database {
 
     async getDataByFloor(floor) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where этаж = ${floor}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -52,15 +53,15 @@ class Database {
     }
     async getDataByApartment(apartment) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
-            `where квартира = ${apartment}` +
+            'from \"Квартиры\"\n' +
+            `where квартира = ${apartment}\n` +
             'group by квартира;';
         const result = await this.client.query(query);
         console.log('Выбранные Данные:', result.rows);
     }
     async getDataByQuadratureMore(quadrature) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where квадратура > ${quadrature}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -68,7 +69,7 @@ class Database {
     }
     async getDataByQuadratureLess(quadrature) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where квартира < ${quadrature}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -76,7 +77,7 @@ class Database {
     }
     async getDataByEntrance(entrance) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where подъезд = ${entrance}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -84,7 +85,7 @@ class Database {
     }
     async getDataByRooms(rooms) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where комнаты = ${rooms}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -92,7 +93,7 @@ class Database {
     }
     async getDataByCostMore(cost) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where стоимость > ${cost}` +
             'group by квартира;';
         const result = await this.client.query(query);
@@ -100,7 +101,7 @@ class Database {
     }
     async getDataByCostLess(cost) {
         const query = 'select квартира\n' +
-            'from "Квартиры"\n' +
+            'from \"Квартиры\"\n' +
             `where стоимость < ${cost}` +
             'group by квартира;';
         const result = await this.client.query(query);

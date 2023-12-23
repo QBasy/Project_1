@@ -1,0 +1,15 @@
+.search {
+    color: black;
+    margin-top: 40px;
+    background-color: rgba(16, 40, 79, 0.2);
+}
+
+.cont {
+    color: black;
+    margin-top: 10px;
+    background-color: rgba(16, 40, 79, 0.2);
+}
+
+.dropdown-item:hover {
+    background-color: #b3d4fc;
+}
