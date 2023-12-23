@@ -1,0 +1,48 @@
+.search {
+    color: black;
+    margin-top: 40px;
+    background-color: rgba(16, 40, 79, 0.2);
+}
+
+.cont {
+    color: black;
+    margin-top: 10px;
+    background-color: rgba(16, 40, 79, 0.2);
+}
+
+.dropdown-item:hover {
+    background-color: #b3d4fc;
+}
+
+ul, #myUL {
+    list-style-type: none;
+}
+
+#myUL {
+    margin: 0;
+    padding: 0;
+}
+
+.caret {
+    cursor: pointer;
+    user-select: none;
+}
+
+.caret::before {
+    content: "\25B6";
+    color: black;
+    display: inline-block;
+    margin-right: 6px;
+}
+
+.caret-down::before {
+    transform: rotate(90deg);
+}
+
+.nested {
+    display: none;
+}
+
+.active {
+    display: block;
+}

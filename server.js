@@ -5,15 +5,17 @@ const app = express();
 const port = 1337;
 const db = new Database();
 
+app.set('view engine', 'ejs');
+app.set('views', './files');
 
-app.use(express.json());
+app.use(express.static('files'));
 
 app.get('/', (req,res) => {
-    res.sendFile(__dirname+'/frontend/index.html');
+    res.render('index.ejs');
 });
 
 app.get('/index',(req,res) => {
-    res.sendFile(__dirname+'/frontend/index.html')
+    res.render('index.ejs');
 })
 
 app.get('/database/:apartmentName', async (req,res) => {
@@ -40,6 +42,7 @@ app.listen(port, () => {
 });
 
 db.connect().then(async r => {
-    await db.getDataByApartment('1')
+    await db.getDataByApartment('11');
+
     await db.disconnect();
 });
