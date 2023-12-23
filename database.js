@@ -19,7 +19,7 @@ class Database {
         }
     }
 
-    async createTable() {
+    /**async createTable() {
         const query = '' +
             '   CREATE TABLE IF NOT EXISTS Квартира (\n' +
             '      здание varchar(200) NOT NULL,\n' +
@@ -32,7 +32,7 @@ class Database {
             '   );';
         await this.client.query(query);
         console.log('');
-    }
+    }**/
 
     async insertData(apartment, house, entrance, floor, quadrature, rooms, cost) {
         const query = '' +
