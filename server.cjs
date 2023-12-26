@@ -1,5 +1,5 @@
 const express = require('express');
-const Database = require("./database");
+const Database = require("./database.cjs");
 
 const app = express();
 const port = 1337;
@@ -7,6 +7,8 @@ const db = new Database();
 
 app.set('view engine', 'ejs');
 app.set('views', './files');
+
+
 
 app.use(express.static('files'));
 
@@ -16,6 +18,10 @@ app.get('/', (req,res) => {
 
 app.get('/index',(req,res) => {
     res.render('index.ejs');
+})
+
+app.get('/adder', (req, res) => {
+    res.render('adder.ejs')
 })
 
 app.get('/database/:apartmentName', async (req,res) => {
@@ -42,7 +48,6 @@ app.listen(port, () => {
 });
 
 db.connect().then(async r => {
-    await db.getDataByApartment('11');
-
+    await db.getByCostMoreLess('170000.0', '1000000');
     await db.disconnect();
 });

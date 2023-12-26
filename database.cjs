@@ -1,4 +1,12 @@
-const {Client} = require('pg');
+const { Client } = require('pg');
+
+const cl = new Client({
+    host: 'localhost',
+    port: 5432,
+    database: 'project_1',
+    user: 'postgres',
+    password: 'japierdole',
+});
 
 class Database {
     constructor() {
@@ -34,42 +42,47 @@ class Database {
         console.log('');
     }**/
 
-    async insertData(apartment, house, entrance, floor, quadrature, rooms, cost) {
-        const query = '' +
-            'INSERT INTO квартира (номер, здание, подъезд, этаж, квадратура, комнаты, стоимость)\n' +
-            'VALUES' +
-            `('${apartment}', ${house}, ${entrance}, ${floor}, ${quadrature}, ${rooms}, ${cost}),` +
-            'INSERT INTO подъезд (подъезд, квартира, здание)\n' +
-            'VALUES\n' +
-            `  (${entrance}, ${apartment}, ${house}),\n` +
-            `INSERT INTO здание (здание, подъезд, квартира)\n` +
-            'VALUES\n' +
-            `  (${house}, ${entrance}, ${apartment}),`;
-        await this.client.query(query);
-        console.log('Квартира загружена');
+    async insertData(apartment, house, entrance, floor, quadrature, rooms, cost, status) {
+        try {
+            const query = '' +
+                'INSERT INTO квартира (номер, здание, подъезд, этаж, квадратура, комнаты, стоимость, статус)\n' +
+                'VALUES\n' +
+                `(${apartment}, '${house}', ${entrance}, ${floor}, ${quadrature}, ${rooms}, ${cost}, ${status});`;
+            await this.client.query(query);
+            console.log('Квартира загружена');
+        } catch (err) {
+            console.log('Ошибка ', err);
+        }
     }
 
-    async insertManyData(count, apartment, house, entrance, floor, quadrature, rooms, cost){
+    async insertManyData(count, apartment, house, entrance, floor, quadrature, rooms, cost, status){
         for (let i = 0; i < count; i++) {
-            await this.insertData(apartment[i], house[i], entrance[i], floor[i], quadrature[i], rooms[i], cost[i])
+            await this.insertData(apartment[i], house[i], entrance[i], floor[i], quadrature[i], rooms[i], cost[i], status[i])
         }
     }
 
     async getDataByFloorLess(floor) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where этаж <= ${floor}` +
+            `where этаж <= ${floor}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
+    }
+    async getDataByStatus(status){
+        const query = 'select номер from квартира\n' +
+            `where статус = ${status}\n` +
+            'group by номер;';
+        const result = await this.client.query(query);
+        return result.rows.map(row => row['номер']);
     }
     async getDataByFloorMore(floor) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where этаж >= ${floor}` +
+            `where этаж >= ${floor}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
     async getDataByApartment(apartment) {
         const query = 'select номер\n' +
@@ -77,55 +90,76 @@ class Database {
             `where номер = ${apartment}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
     async getDataByQuadratureMore(quadrature) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where квадратура > ${quadrature}` +
+            `where квадратура >= ${quadrature}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
+
     async getDataByQuadratureLess(quadrature) {
         const query = 'select номер\n' +
-            'from квартира"\n' +
-            `where квадратура < ${quadrature}` +
+            'from квартира\n' +
+            `where квадратура <= ${quadrature}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
+
     async getDataByEntrance(entrance) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where подъезд = ${entrance}` +
+            `where подъезд = ${entrance}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
-    async getDataByRooms(rooms) {
+
+    async getDataByRoomsMore(rooms) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where комнаты = ${rooms}` +
+            `where комнаты >= ${rooms}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
+    async getDataByRoomsLess(rooms) {
+        const query = 'select номер\n' +
+            'from квартира\n' +
+            `where комнаты <= ${rooms}\n` +
+            'group by номер;';
+        const result = await this.client.query(query);
+        return result.rows.map(row => row['номер']);
+    }
+
     async getDataByCostMore(cost) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where стоимость > ${cost}` +
+            `where стоимость >= ${cost}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
     }
+
     async getDataByCostLess(cost) {
         const query = 'select номер\n' +
             'from квартира\n' +
-            `where стоимость < ${cost}` +
+            `where стоимость <= ${cost}\n` +
             'group by номер;';
         const result = await this.client.query(query);
-        console.log('Выбранные Данные:', result.rows);
+        return result.rows.map(row => row['номер']);
+    }
+
+    async getByCostMoreLess(more, less) {
+        const query = 'select номер from квартира\n' +
+            `where стоимость >= ${more} and стоимость < ${less}\n` +
+            'group by номер; '
+        const result = await this.client.query(query);
+        return result.rows.map(row => row['номер']);
     }
     async disconnect() {
         await this.client.end();
