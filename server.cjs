@@ -1,5 +1,6 @@
 const express = require('express');
 const Database = require("./database.cjs");
+const fileUpload = require('express-fileupload');
 
 const app = express();
 const port = 1337;
@@ -8,9 +9,8 @@ const db = new Database();
 app.set('view engine', 'ejs');
 app.set('views', './files');
 
-
-
 app.use(express.static('files'));
+app.use(fileUpload());
 
 app.get('/', (req,res) => {
     res.render('index.ejs');
@@ -43,6 +43,19 @@ app.get('/database/:apartmentName', async (req,res) => {
     }
 });
 
+app.post('/images', (req,res) => {
+    const { image } = req.files;
+
+    if (!image) return res.sendStatus(400);
+
+    if (/^image/.test(image.mimetype)) return res.status(400);
+
+    image.mv('/images' + image.name);
+
+    console.log(req.files);
+
+    res.status(200);
+});
 app.listen(port, () => {
     console.log(`Server is running on ${port}`);
 });
