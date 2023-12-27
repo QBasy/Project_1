@@ -69,6 +69,31 @@ const mapQuery = {
     'roomsLess': resultsArrayRoomsLess,
     'apartmentEqual': resultsArrayApartment
 };
+
+const statusID = document.getElementById('statusID');
+const costMoreID = document.getElementById('costMoreID');
+const costLessID = document.getElementById('costLessID');
+const floorMoreID = document.getElementById('floorMoreID');
+const floorLessID = document.getElementById('floorLessID');
+const areaMoreID = document.getElementById('areaMoreID');
+const areaLessID = document.getElementById('areaLessID');
+const roomsMoreID = document.getElementById('roomsMoreID');
+const roomsLessID = document.getElementById('roomsLessID');
+const apartmentEqualID = document.getElementById('apartmentEqualID');
+
+const mapIdQuery = {
+    statusID: mapQuery.statusIs,
+    costMoreID: mapQuery.costMore,
+    costLessID: mapQuery.costLess,
+    floorMoreID: mapQuery.floorMore,
+    floorLessID: mapQuery.floorLess,
+    areaMoreID: mapQuery.areaMore,
+    areaLessID: mapQuery.areaLess,
+    roomsMoreID: mapQuery.roomsMore,
+    roomsLessID: mapQuery.roomsLess,
+    apartmentEqualID: mapQuery.apartmentEqual,
+}
+
 function select() {
     condition = 25
     console.log(mapQuery.areaMore)
