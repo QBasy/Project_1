@@ -9,6 +9,132 @@
     <script src="https://kit.fontawesome.com/f5c7d6a886.js" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="img/city-solid.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="js/adder.js"></script>
+    <script>
+        async function groupColumns() {
+            let container = document.getElementById("cardContainer");
+            let row = container.getElementsByClassName("row");
+
+            for (let i = 0; i < row.length; i += 3) {
+                let newCol = document.createElement("div");
+                newCol.className = "col-md-4";
+
+                for (let j = 0; j < 3 && i + j < row.length; j++) {
+                    newCol.appendChild(row[i + j]);
+                }
+                container.appendChild(newCol);
+
+                if (i + 3 < row.length) {
+                    let lineBreak = document.createElement("br");
+                    container.appendChild(lineBreak);
+                    container.appendChild(lineBreak);
+                }
+            }
+        }
+
+        async function refresh() {
+            let container = document.getElementById("cardContainer");
+            container.innerHTML = "";
+
+            try {
+                const response = await fetch('savedCards.json');
+                const jsonData = await response.json();
+
+                let currentRow;
+
+                for (let key in jsonData) {
+                    if (jsonData.hasOwnProperty(key)) {
+                        let apartment = jsonData[key];
+                        let cardElement = createCard(apartment);
+
+                        console.log("Data for Apartment #" + apartment.apartmentNumber + ":", apartment);
+
+                        let column = document.createElement("div");
+                        column.className = "col-md-4";
+                        column.appendChild(cardElement);
+
+                        if (!currentRow || currentRow.children.length === 3) {
+                            currentRow = document.createElement("div");
+                            currentRow.className = "row";
+                            container.appendChild(currentRow);
+                        }
+
+                        currentRow.appendChild(column);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching or parsing JSON:', error);
+            }
+        }
+        function booking() {}
+
+        async function findBy() {
+            const house = document.getElementById('houseID').value;
+            const roomsLess = document.getElementById('roomsLessID').value;
+            const roomsMore = document.getElementById('roomsMoreID').value;
+            const floorLess = document.getElementById('floorLessID').value;
+            const floorMore = document.getElementById('floorMoreID').value;
+            const areaLess = document.getElementById('areaLessID').value;
+            const areaMore = document.getElementById('areaMoreID').value;
+            const costLess = document.getElementById('costLessID').value;
+            const costMore = document.getElementById('costMoreID').value;
+            const apartmentEqual = document.getElementById('apartmentEqualID').value;
+
+            try {
+                const response = await fetch('/filter', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        house,
+                        roomsLess,
+                        roomsMore,
+                        floorLess,
+                        floorMore,
+                        areaLess,
+                        areaMore,
+                        costLess,
+                        costMore,
+                        apartmentEqual,
+                    }),
+                });
+
+                const jsonData = await response.json();
+                let container = document.getElementById("cardContainer");
+                container.innerHTML = "";
+
+                let currentRow;
+
+                for (let key in jsonData) {
+                    if (jsonData.hasOwnProperty(key)) {
+                        let apartment = jsonData[key];
+                        let cardElement = createCard(apartment);
+
+                        let column = document.createElement("div");
+                        column.className = "col-md-4";
+                        column.appendChild(cardElement);
+
+                        if (!currentRow || currentRow.children.length === 3) {
+                            currentRow = document.createElement("div");
+                            currentRow.className = "row";
+                            container.appendChild(currentRow);
+                        }
+
+                        currentRow.appendChild(column);
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching or parsing JSON:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            postMessage('/refresh');
+            refresh();
+            groupColumns();
+        });
+    </script>
 </head>
 
 <body style="background-color: rgb(200,200,200);">
@@ -42,22 +168,18 @@
 
 <!-- FILTER -->
 <div class="container-sm pt-2 pb-2 px-4 search">
+    <form onsubmit="findBy(); return false;">
     <!-- FIRST ROW OF FILTER -->
     <div class="row">
         <!-- HOUSE CHOICE -->
         <div class="col-lg-3 border-end border-secondary d-flex align-items-center">
             <div class="row">
-                <div class="col-lg-6" >
+                <div class="col-lg-5 pt-2 pe-0" >
                     <label>Выбрать ЖК</label>
                 </div>
-                <div class="col-lg-6">
-                    <label>
-                        <select>
-                            <option value="">Выбрать</option>
-                            <option value="Nova">Нова</option>
-                            <option value="Esil">Есиль</option>
-                            <option value="Vremena goda">Времена года</option>
-                        </select>
+                <div class="col-lg-7 pe-2 ps-0">
+                    <label class="pt-1">
+                        <input class="form-control" id="houseID" value="">
                     </label>
                 </div>
             </div>
@@ -72,7 +194,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="pt-1">
-                        <input class="form-control px-2" max="500" min="0" placeholder="От">
+                        <input class="form-control px-2" max="500" min="0" placeholder="От"  value="" id="roomsLessID">
                     </label>
                 </div>
                 <div class="col-lg-1 pe-1 ps-1 pt-2">
@@ -80,7 +202,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="pt-1">
-                        <input class="form-control px-2" max="500" min="0" placeholder="До">
+                        <input class="form-control px-2" max="500" min="0" placeholder="До"  value="" id="roomsMoreID">
                     </label>
                 </div>
             </div>
@@ -95,7 +217,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="pt-1">
-                        <input class="form-control px-2" max="500" min="0" placeholder="От">
+                        <input class="form-control px-2" max="500" min="0" placeholder="От"  value="" id="floorLessID">
                     </label>
                 </div>
                 <div class="col-lg-1 pt-2 ps-1 pe-1">
@@ -103,7 +225,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="pt-1">
-                        <input class="form-control px-2" max="500" min="0" placeholder="До">
+                        <input class="form-control px-2" max="500" min="0" placeholder="До"  value="" id="floorMoreID">
                     </label>
                 </div>
             </div>
@@ -118,7 +240,7 @@
                 </div>
                 <div class="col-lg-3 pe-1">
                     <label class="pt-1">
-                        <input class="form-control px-2" placeholder="От">
+                        <input class="form-control px-2" placeholder="От"  value="" id="areaLessID">
                     </label>
                 </div>
                 <div class="col-lg-1 pt-2 ps-2 pe-1">
@@ -126,7 +248,7 @@
                 </div>
                 <div class="col-lg-4">
                     <label class="pt-1">
-                        <input class="form-control px-2" placeholder="До">
+                        <input class="form-control px-2" placeholder="До"  value="" id="areaMoreID">
                     </label>
                 </div>
             </div>
@@ -138,14 +260,14 @@
     <!-- SECOND ROW OF FILTER -->
     <div class="row mt-3">
         <!-- PRICE CHOICE -->
-        <div class="col-lg-6 border-end border-secondary">
+        <div class="col-lg-4 border-end border-secondary">
             <div class="row">
                 <div class="col-lg-3 pt-2 ps-5" >
                     <label>Цена, тг</label>
                 </div>
                 <div class="col-lg-3 pe-0 ps-0">
                     <label class="pt-1">
-                        <input class="form-control px-2" value="" id="costMoreID" placeholder="От" style="font-size: 14px">
+                        <input class="form-control px-2" placeholder="От" style="font-size: 14px"  value="" id="costLessID">
                     </label>
                 </div>
                 <div class="col-lg-auto pt-2">
@@ -153,7 +275,7 @@
                 </div>
                 <div class="col-lg-4 ps-0 pe-0">
                     <label class="pt-1">
-                        <input class="form-control px-2" placeholder="До" style="font-size: 14px">
+                        <input class="form-control px-2" placeholder="До" style="font-size: 14px"  value="" id="costMoreID">
                     </label>
                 </div>
             </div>
@@ -161,19 +283,41 @@
         <!-- END OF PRICE CHOICE -->
 
         <!-- FLAT NUMBER CHOICE -->
-        <div class="col-lg-4 border-end border-secondary d-flex align-items-center">
+        <div class="col-lg-3 border-end border-secondary d-flex align-items-center">
             <div class="row">
                 <div class="col-lg-6 ps-5 pt-2">
                     <label>Квартира №</label>
                 </div>
                 <div class="col-lg-6">
                     <label class="pt-1">
-                        <input class="form-control px-2" placeholder="">
+                        <input class="form-control px-2" placeholder="" id="apartmentEqualID" value="">
                     </label>
                 </div>
             </div>
         </div>
         <!-- END OF FLAT NUMBER CHOICE -->
+
+        <!-- STATUS CHOICE -->
+        <div class="col-lg-3 border-end border-secondary d-flex align-items-center">
+            <div class="row">
+                <div class="col-lg-6 ps-5 pt-2">
+                    <label>Статус</label>
+                </div>
+                <div class="col-lg-6 ps-5 pt-2 dropdown">
+                    <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Статус</a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <form>
+                                <div class="row"><input class="dropdown-item col-lg-6" type="radio" id="sold" name="status" value="Sold"><label class="col-lg-6" for="sold">Продано</label></div>
+                                <input class="dropdown-item" type="radio" id="booked" name="status" value="Booked"><label for="booked">Забронировано</label>
+                                <input class="dropdown-item" type="radio" id="active" name="status" value="Active"><label for="active">Активно</label>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <!-- END OF STATUS CHOICE -->
 
         <!-- SEARCH BUTTON -->
         <div class="col-lg-2 d-flex justify-content-center">
@@ -181,150 +325,17 @@
         </div>
         <!-- END OF SEARCH BUTTON -->
     </div>
-    <!-- END OF SECOND ROW OF FILTER -->
+    <!-- END OF SECOND ROW  OF FILTER -->
+    </form>
 </div>
+
 <!-- END OF FILTER -->
 
 <!-- START OF PRODUCTION -->
-<div class="container-sm pt-3 pb-3 px-4 cont">
+<div class="container-sm pt-3 pb-3 px-4 cont" id="cardContainer">
     <div class="row">
-        <!-- CATEGORY -->
-        <div class="col-lg-3 border-bottom border-secondary">
-            <ul id="myUL">
-                <li><span class="caret">ЖК</span>
-                    <ul class="nested">
-                        <li><span class="caret">Времена года Осень</span>
-                            <ul class="nested">
-                                <li><span class="caret">Подъезд 1</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                        <li>Этаж 4</li>
-                                        <li>Этаж 5</li>
-                                        <li>Этаж 6</li>
-                                        <li>Этаж 7</li>
-                                        <li>Этаж 8</li>
-                                        <li>Этаж 9</li>
-                                        <li>Этаж 10</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 2</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                        <li>Этаж 4</li>
-                                        <li>Этаж 5</li>
-                                        <li>Этаж 6</li>
-                                        <li>Этаж 7</li>
-                                        <li>Этаж 8</li>
-                                        <li>Этаж 9</li>
-                                        <li>Этаж 10</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 3</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                        <li>Этаж 4</li>
-                                        <li>Этаж 5</li>
-                                        <li>Этаж 6</li>
-                                        <li>Этаж 7</li>
-                                        <li>Этаж 8</li>
-                                        <li>Этаж 9</li>
-                                        <li>Этаж 10</li>
-                                    </ul>
-                                </li><li><span class="caret">Подъезд 4</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                        <li>Этаж 4</li>
-                                        <li>Этаж 5</li>
-                                        <li>Этаж 6</li>
-                                        <li>Этаж 7</li>
-                                        <li>Этаж 8</li>
-                                        <li>Этаж 9</li>
-                                        <li>Этаж 10</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 5</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                        <li>Этаж 4</li>
-                                        <li>Этаж 5</li>
-                                        <li>Этаж 6</li>
-                                        <li>Этаж 7</li>
-                                        <li>Этаж 8</li>
-                                        <li>Этаж 9</li>
-                                        <li>Этаж 10</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><span class="caret">Нова</span>
-                            <ul class="nested">
-                                <li><span class="caret">Подъезд 1</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 2</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 3</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><span class="caret">Есиль</span>
-                            <ul class="nested">
-                                <li><span class="caret">Подъезд 1</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 2</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                                <li><span class="caret">Подъезд 3</span>
-                                    <ul class="nested">
-                                        <li>Этаж 1</li>
-                                        <li>Этаж 2</li>
-                                        <li>Этаж 3</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </li>
-            </ul>
-        </div>
-        <script src="js/category.js"></script>
-        <!-- END OF CATEGORY -->
     </div>
 </div>
 <!-- END OF PRODUCTION -->
 </body>
 </html>
-

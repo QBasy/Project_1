@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Adding Tool</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://kit.fontawesome.com/f5c7d6a886.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/x-icon" href="img/city-solid.svg">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById("hiding").addEventListener('click', function () {
+                addCardToContainer();
+            });
+        });
+    </script>
+</head>
+
+<body style="background-color: rgb(200,200,200);">
+<!-- NAVBAR -->
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="index">
+            <i class="fa-solid fa-house"></i>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#collapsibleNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="collapsibleNavbar">
+            <ul class="navbar-nav">
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Обзор</a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Продано</a></li>
+                        <li><a class="dropdown-item" href="#">Забронировано</a></li>
+                        <li><a class="dropdown-item" href="#">Активно</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="adder">Adding tool</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<!-- END OF NAVBAR -->
+
+<!-- START OF FLAT ADDER -->
+<div class="container-sm pt-3 pb-3 px-4 cont">
+
+</div>
+
+</body>
+
+</html>

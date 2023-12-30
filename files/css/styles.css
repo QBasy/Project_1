@@ -46,3 +46,7 @@ ul, #myUL {
 .active {
     display: block;
 }
+
+img {
+    height: 250px;
+}

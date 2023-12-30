@@ -9,6 +9,29 @@
     <script src="https://kit.fontawesome.com/f5c7d6a886.js" crossorigin="anonymous"></script>
     <link rel="icon" type="image/x-icon" href="img/city-solid.svg">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            document.getElementById("hiding").addEventListener('click', function () {
+                addCardToContainer();
+            });
+        });
+
+        document.getElementById('hiding').addEventListener('onclick'), function () {
+            const house = document.getElementById('house') ? document.getElementById('house').value : '';
+            const apartmentNumberValue = document.getElementById('flat') ? document.getElementById('flat').value : '';
+            const porchValue = document.getElementById('porch') ? document.getElementById('porch').value : '';
+            const floorValue = document.getElementById('floor') ? document.getElementById('floor').value : '';
+            const areaValue = document.getElementById('area') ? document.getElementById('area').value : '';
+            const roomAmountValue = document.getElementById('roomAmount') ? document.getElementById('roomAmount').value : '';
+            const priceValue = document.getElementById('price') ? document.getElementById('price').value : '';
+            const imagePathValue = document.getElementById('image') ? document.getElementById('image').value : '';
+            if (!house || !apartmentNumberValue || !porchValue || !floorValue || !areaValue || !roomAmountValue || !priceValue || !imagePathValue) {
+                alert('Please fill in all required fields.');
+                return;
+            }
+            postMessage('/addData');
+        }
+    </script>
 </head>
 
 <body style="background-color: rgb(200,200,200);">
@@ -40,27 +63,6 @@
 </nav>
 <!-- END OF NAVBAR -->
 
-<!-- START OF HOUSE ADDER -->
-<div class="container-sm pt-3 pb-3 px-4 cont">
-    <div class="row">
-        <div class="col-lg mx-5 px-5 border-bottom border-secondary d-flex justify-content-center">
-            <h1>Добавить ЖК</h1>
-        </div>
-    </div>
-
-    <div class="row mt-4">
-        <div class="col-lg mx-5 px-5 border-secondary d-flex align-items-center">
-            <h6 class="pt-2 me-4">Название ЖК</h6>
-            <label style="width: 400px">
-                <input class="form-control" placeholder="">
-            </label>
-            <button class="btn btn-primary ms-5">Добавить</button>
-        </div>
-    </div>
-    <script src="#"></script>
-</div>
-<!-- END OF HOUSE ADDER -->
-
 <!-- START OF FLAT ADDER -->
 <div class="container-sm pt-3 pb-3 px-4 cont">
     <div class="row">
@@ -70,15 +72,12 @@
         </div>
 
         <div class="row mt-4">
-            <div class="col-lg mx-5 px-5 border-secondary d-flex align-items-center">
-                <h6 class="pt-2 me-5 pe-2">ЖК</h6>
-                <label class="ms-5 ps-5">
-                    <select style="width: 600px">
-                        <option value="">Выбрать</option>
-                        <option value="Nova">Нова</option>
-                        <option value="Esil">Есиль</option>
-                        <option value="Vremena goda">Времена года</option>
-                    </select>
+            <div class="col-lg-2 ms-5 ps-5">
+                <h6 class="pt-2 me-4">ЖК</h6>
+            </div>
+            <div class="col-lg-6">
+                <label style="width: 600px">
+                    <input class="form-control" placeholder="" value="" id="house">
                 </label>
             </div>
         </div>
@@ -89,7 +88,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="flat">
                 </label>
             </div>
         </div>
@@ -100,7 +99,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="porch">
                 </label>
             </div>
         </div>
@@ -111,7 +110,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="floor">
                 </label>
             </div>
         </div>
@@ -122,7 +121,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="area">
                 </label>
             </div>
         </div>
@@ -133,7 +132,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="roomAmount">
                 </label>
             </div>
         </div>
@@ -144,7 +143,7 @@
             </div>
             <div class="col-lg-6">
                 <label style="width: 600px">
-                    <input class="form-control" placeholder="">
+                    <input class="form-control" placeholder="" value="" id="price">
                 </label>
             </div>
         </div>
@@ -152,16 +151,15 @@
         <div class="row mt-4">
             <div class="col-lg-2 ms-5 ps-5">
                 <h6 class="pt-2 me-4">Фото</h6>
-                <form>
-                    <input type="file" id="myFile" name="filename">
-                    <input type="submit">
+                <form action="/images" method="POST" enctype="multipart/form-data">
+                    <input type="file" id="image" value="" name="filename">
                 </form>
             </div>
             <div class="col-lg-6 d-flex justify-content-end">
-                <button class="btn btn-primary ms-5">Добавить</button>
+                <button class="btn btn-primary ms-5" id="hiding">Добавить</button>
             </div>
         </div>
-        <script src="#"></script>
+        <script src="js/adder.js" defer></script>
         <!-- END OF ADDING TOOL -->
     </div>
 </div>

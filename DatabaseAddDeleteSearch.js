@@ -1,7 +1,6 @@
 import Database from './database.cjs';
 const db = new Database();
 
-
 async function addApartment(apartment, house, entrance, floor, quadrature, rooms, cost, status) {
     try {
         await db.connect().then(async r => {
@@ -95,11 +94,9 @@ const mapIdQuery = {
 }
 
 function select() {
-    condition = 25
-    console.log(mapQuery.areaMore)
+    console.log(mapQuery)
     for (let card of mapQuery.areaMore) {
         console.log(card);
     }
 }
 
-select()
