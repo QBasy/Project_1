@@ -33,6 +33,7 @@
         }
 
         async function refresh() {
+            postMessage('/refresh');
             let container = document.getElementById("cardContainer");
             container.innerHTML = "";
 
@@ -130,7 +131,6 @@
         }
 
         document.addEventListener('DOMContentLoaded', function () {
-            postMessage('/refresh');
             refresh();
             groupColumns();
         });
