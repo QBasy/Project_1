@@ -70,6 +70,7 @@ app.post('/refresh',async (req, res) => {
         if (results && results.length > 0) {
             const apartmentsObject = {};
             results.forEach(apartment => {
+                console.log(apartmentsObject);
                 apartmentsObject[apartment.номер] = apartment;
             });
             fs.writeFileSync(__dirname + '/files/savedCards.json', JSON.stringify(apartmentsObject), {
@@ -83,24 +84,45 @@ app.post('/refresh',async (req, res) => {
         console.error('Error:', error);
         res.status(500).json({error: 'Internal server error'});
     } finally {
-        if (client) {
-            await db.disconnect();
-        }
+        await db.disconnect();
     }
 });
 
 app.post('/filter', async (req, res) => {
     const filters = req.body;
-
-    let client;
+    const filePath = __dirname + '/files/savedCards.json';
     try {
         client = await db.connect();
         const filteredData = await db.filter(filters);
         res.json(filteredData);
         if (filteredData && filteredData.length > 0) {
             const apartmentsObject = {};
+            console.log(apartmentsObject, ")))");
             filteredData.forEach(apartment => {
                 apartmentsObject[apartment.номер] = apartment;
+            });
+            fs.readFile(filePath, 'utf8', (err, data) => {
+                if (err) {
+                    console.error('Error reading file:', err);
+                    return;
+                }
+
+                try {
+                    let jsonData = JSON.parse(data);
+
+                    jsonData = {};
+
+                    const jsonString = JSON.stringify(jsonData, null, 2); // the third argument (2) is for indentation
+                    fs.writeFile(filePath, jsonString, 'utf8', (err) => {
+                        if (err) {
+                            console.error('Error writing file:', err);
+                        } else {
+                            console.log('File cleared successfully.');
+                        }
+                    });
+                } catch (parseError) {
+                    console.error('Error parsing JSON:', parseError);
+                }
             });
             fs.writeFileSync(__dirname + '/files/savedCards.json', JSON.stringify(apartmentsObject), {
                 encoding: 'utf8',
@@ -151,7 +173,6 @@ app.post('/addData', async (req, res) => {
         client = await db.connect();
 
         const results = await db.getAll();
-
         if (results && results.length > 0) {
             const apartmentsObject = {};
             results.forEach(apartment => {
