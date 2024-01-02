@@ -11,7 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="js/adder.js"></script>
     <script>
-        let status = 'Active';
+        let status = '';
         function statusSold() {
             status = 'Продано';
         }
@@ -30,6 +30,9 @@
                 newCol.className = "col-md-4";
 
                 for (let j = 0; j < 3 && i + j < row.length; j++) {
+                    container.appendChild("br")
+                    container.appendChild("br")
+                    container.appendChild("br")
                     newCol.appendChild(row[i + j]);
                 }
                 container.appendChild(newCol);
@@ -42,11 +45,85 @@
             }
         }
 
+        async function booking2(apartment) {
+            try {
+                const response = await fetch('/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        apartment,
+                    }),
+                });
+                console.log(response);
+            } catch (error) {
+                console.error('Error during booking:', error);
+            }
+            console.log(response);
+        }
+        async function booking() {
+            const bookingApartmentID = document.getElementById('bookingApartmentID').value;
+
+            try {
+                const response = await fetch('/booking', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        bookingApartmentID,
+                    }),
+                });
+                console.log(response);
+            } catch (error) {
+                console.error('Error during booking:', error);
+            }
+        }
+
+        async function unBook() {
+            const unBookApartmentID = document.getElementById('unBookApartmentID').value;
+
+            try {
+                const response = await fetch('/unBook', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        unBookApartmentID,
+                    }),
+                });
+                console.log(response);
+            } catch (error) {
+                console.error('Error during booking:', error);
+            }
+        }
+
+        async function sell() {
+            const sellID = document.getElementById('sellID').value;
+
+            try {
+                const response = await fetch('/sell', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sellID,
+                    }),
+                });
+                console.log(response);
+            } catch (error) {
+                console.error('Error during selling:', error);
+            }
+        }
+
         async function refresh() {
-            postMessage('/refresh');
             let container = document.getElementById("cardContainer");
             container.innerHTML = "";
 
+            postMessage('/refresh');
             try {
                 const response = await fetch('savedCards.json');
                 const jsonData = await response.json();
@@ -77,7 +154,6 @@
                 console.error('Error fetching or parsing JSON:', error);
             }
         }
-        function booking() {}
 
         async function findBy() {
             const house = document.getElementById('houseID').value;
@@ -111,39 +187,12 @@
                         status,
                     }),
                 });
-
-                console.log(response);
-                const Json = await fetch('savedCards.json');
-                const jsonData = await Json.json();
-
-                let container = document.getElementById("cardContainer");
-                container.innerHTML = "";
-                let currentRow;
-
-                for (let key in jsonData) {
-                    if (jsonData.hasOwnProperty(key)) {
-                        let apartment = jsonData[key];
-                        let cardElement = createCard(apartment);
-
-                        console.log("Data for Apartment #" + apartment.apartmentNumber + ":", apartment);
-
-                        let column = document.createElement("div");
-                        column.className = "col-md-4";
-                        column.appendChild(cardElement);
-
-                        if (!currentRow || currentRow.children.length === 3) {
-                            currentRow = document.createElement("div");
-                            currentRow.className = "row";
-                            container.appendChild(currentRow);
-                        }
-
-                        currentRow.appendChild(column);
-                    }
-                }
             } catch (error) {
                 console.error('Error fetching or parsing JSON:', error);
             }
+            setTimeout((await refresh().then(async r => {await groupColumns()})), 3000);
         }
+
         document.addEventListener('DOMContentLoaded', function () {
             refresh();
             groupColumns();
@@ -320,13 +369,9 @@
                 <div class="col-lg-6 ps-5 pt-2 dropdown">
                     <a class="btn btn-primary dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Статус</a>
                     <ul class="dropdown-menu">
-                        <li>
-                            <form>
-                                <input class="dropdown-item" type="radio" id="sold" name="status" value="Продано"><label onclick="" for="sold">Продано</label>
-                                <input class="dropdown-item" type="radio" id="booked" name="status" value="Забронировано"><label for="booked">Забронировано</label>
-                                <input class="dropdown-item" type="radio" id="active" name="status" value="Активно"><label for="active">Активно</label>
-                            </form>
-                        </li>
+                        <li><a class="dropdown-item" onclick="statusSold()">Продано</a>
+                        <li><a class="dropdown-item" onclick="statusBooked()">Забронировано</a>
+                        <li><a class="dropdown-item" onclick="statusActive()">Активно</a>
                     </ul>
                 </div>
             </div>
@@ -335,11 +380,15 @@
 
         <!-- SEARCH BUTTON -->
         <div class="col-lg-3 border-end border-secondary d-flex align-items-center mt-3">
-            <div class="col-lg-4">
+            <div class="col-lg-1">
+            </div>
+            <div class="col-lg-3">
                 <a class="btn btn-primary" onclick="findBy()">ПОИСК</a>
             </div>
             <br>
-            <div class="col-lg-8">
+            <div class="col-lg-2">
+            </div>
+            <div class="col-lg-3">
                 <a class="btn btn-primary" onclick="refresh(); groupColumns()">СБРОСИТЬ</a>
             </div>
         </div>
@@ -357,5 +406,42 @@
     </div>
 </div>
 <!-- END OF PRODUCTION -->
+
+<!-- START OF BOOKING -->
+<div class="container-sm pt-2 pb-2 px-4 search">
+    <div class="row">
+        <div class="col-lg-4 row">
+            <div class="col-lg-4 pe-0 pt-1">
+                <label class="pt-1">
+                    <input class="form-control px-2" placeholder="" id="bookingApartmentID" value="">
+                </label>
+            </div>
+            <div class="col-lg-6 pe-0 pt-2">
+                <a class="btn btn-primary" onclick="booking()">Забронировать</a>
+            </div>
+        </div>
+        <div class="col-lg-4 row">
+            <div class="col-lg-4 pe-0 pt-1">
+                <label class="pt-1">
+                    <input class="form-control px-2" placeholder=""  value="" id="unBookApartmentID">
+                </label>
+            </div>
+            <div class="col-lg-6 pe-0 pt-2">
+                <a class="btn btn-primary" onclick="unBook()">Разбронировать</a>
+            </div>
+        </div>
+        <div class="col-lg-4 row" style="margin-right: 5px">
+            <div class="col-lg-4 pe-0 pt-1">
+                <label class="pt-1">
+                    <input class="form-control px-2" placeholder=""  value="" id="sellID">
+                </label>
+            </div>
+            <div class="col-lg-8 pe-0 pt-2">
+                <a class="btn btn-primary" onclick="sell()">Продать</a>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- END OF BOOKING -->
 </body>
 </html>

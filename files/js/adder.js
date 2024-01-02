@@ -6,6 +6,9 @@ function createCard(apartment) {
     cardImage.className = 'card-img-top';
     cardImage.src = apartment.image;
     cardImage.alt = 'Apartment Image';
+    cardImage.onclick = function () {
+        open(apartment.image)
+    }
     card.appendChild(cardImage);
 
     const cardBody = document.createElement('div');
@@ -26,8 +29,16 @@ function createCard(apartment) {
         "Цена: " + apartment.стоимость + '<br>';
 
     const cardStatus = document.createElement('a');
-    cardStatus.className = 'btn btn-primary';
-    cardStatus.onclick = booking(apartment.номер);
+    if (apartment.статус === 'Забронировано') {
+        cardStatus.className = 'btn btn-warning';
+    } else if (apartment.статус === 'Продано') {
+        cardStatus.className = 'btn btn-danger';
+    } else {
+        cardStatus.className = 'btn btn-primary';
+        cardStatus.onclick = function () {
+            booking2(apartment.номер);
+        }
+    }
     cardStatus.innerHTML = apartment.статус;
 
     cardBody.appendChild(cardTitle);

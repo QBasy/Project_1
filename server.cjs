@@ -1,9 +1,12 @@
+// server.cjs
 const express = require('express');
 const Database = require("./database.cjs");
 const bodyParser = require('body-parser');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const {as} = require("pg-promise");
+const savedCardsPath = __dirname + '/files/savedCards.json';
 
 const app = express();
 const port = 1337;
@@ -15,21 +18,21 @@ app.set('views', './files');
 app.use(express.static('files'));
 app.use(bodyParser.json());
 
-app.get('/', (req,res) => {
+app.get('/', (req, res) => {
     res.render('index.ejs');
 });
 
-app.get('/index',(req,res) => {
+app.get('/index', (req, res) => {
     res.render('index.ejs');
-})
+});
 
 app.get('/adder', (req, res) => {
     res.render('adder.ejs');
-})
+});
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, 'images'); // Specify the directory where files will be stored
+        cb(null, 'images');
     },
     filename: (req, file, cb) => {
         const uniqueFileName = `/img/${Date.now()}${path.extname(file.originalname)}`;
@@ -58,79 +61,165 @@ app.post('/images', (req, res) => {
 });
 
 app.get('/addToDB', (req, res) => {
-    res.sendFile('index.ejs')
+    res.sendFile('index.ejs');
 });
 
-app.post('/refresh',async (req, res) => {
+app.post('/refresh', async (req, res) => {
+    let client;
+    console.log('1')
     try {
         client = await db.connect();
 
         const results = await db.getAll();
 
-        if (results && results.length > 0) {
-            const apartmentsObject = {};
-            results.forEach(apartment => {
-                console.log(apartmentsObject);
-                apartmentsObject[apartment.номер] = apartment;
-            });
-            fs.writeFileSync(__dirname + '/files/savedCards.json', JSON.stringify(apartmentsObject), {
-                encoding: 'utf8',
-                flag: 'w'
-            });
-        } else {
-            console.log('No rows returned from the query.');
+        const apartmentsObject = {};
+        results.forEach(apartment => {
+            apartmentsObject[apartment.номер] = apartment;
+        });
+        const existingApartments = JSON.parse(fs.readFileSync(savedCardsPath, 'utf8'));
+        console.log('2')
+        for (const key in existingApartments) {
+            if (!apartmentsObject[key]) {
+                delete existingApartments[key];
+            }
         }
+
+        fs.writeFileSync(savedCardsPath, JSON.stringify(existingApartments, null, 2), {
+            encoding: 'utf8',
+            flag: 'w'
+        });
+        console.log('File updated successfully.');
+        res.status(200).json({ message: 'File updated successfully.' });
     } catch (error) {
         console.error('Error:', error);
-        res.status(500).json({error: 'Internal server error'});
+        res.status(500).json({ error: 'Internal server error' });
     } finally {
-        await db.disconnect();
+        if (client) {
+            await db.disconnect();
+        }
     }
 });
 
 app.post('/filter', async (req, res) => {
     const filters = req.body;
-    const filePath = __dirname + '/files/savedCards.json';
+    const client = await db.connect();
+
     try {
-        client = await db.connect();
-        const filteredData = await db.filter(filters);
-        res.json(filteredData);
-        if (filteredData && filteredData.length > 0) {
+        await client;
+
+        const results = await db.filter(filters);
+        if (results && results.length > 0) {
             const apartmentsObject = {};
-            console.log(apartmentsObject, ")))");
-            filteredData.forEach(apartment => {
+            results.forEach(apartment => {
                 apartmentsObject[apartment.номер] = apartment;
             });
-            fs.readFile(filePath, 'utf8', (err, data) => {
-                if (err) {
-                    console.error('Error reading file:', err);
-                    return;
-                }
-
-                try {
-                    let jsonData = JSON.parse(data);
-
-                    jsonData = {};
-
-                    const jsonString = JSON.stringify(jsonData, null, 2); // the third argument (2) is for indentation
-                    fs.writeFile(filePath, jsonString, 'utf8', (err) => {
-                        if (err) {
-                            console.error('Error writing file:', err);
-                        } else {
-                            console.log('File cleared successfully.');
-                        }
-                    });
-                } catch (parseError) {
-                    console.error('Error parsing JSON:', parseError);
-                }
-            });
-            fs.writeFileSync(__dirname + '/files/savedCards.json', JSON.stringify(apartmentsObject), {
-                encoding: 'utf8',
-                flag: 'w'
-            });
+            fs.writeFileSync(savedCardsPath, JSON.stringify(apartmentsObject), { encoding: 'utf8', flag: 'w' });
+        } else {
+            console.log('No rows returned from the query.');
         }
     } catch (error) {
-        console.error('Error filtering data:', error);
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        if (client) {
+            await db.disconnect();
+        }
+    }
+});
+
+app.post('/booking', async (req, res) => {
+    const { bookingApartmentID } = req.body;
+    const client = await db.connect();
+
+    try {
+        await client;
+        await db.book(bookingApartmentID);
+
+        const results = await db.getAll();
+
+        const apartmentsObject = {};
+        results.forEach(apartment => {
+            apartmentsObject[apartment.номер] = apartment;
+        });
+        const existingApartments = JSON.parse(fs.readFileSync(savedCardsPath, 'utf8'));
+        for (const key in existingApartments) {
+            if (!apartmentsObject[key]) {
+                delete existingApartments[key];
+            }
+        }
+        fs.writeFileSync(savedCardsPath, JSON.stringify(existingApartments, null, 2), {
+            encoding: 'utf8',
+            flag: 'w'
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        if (client) {
+            await db.disconnect();
+        }
+    }
+});
+
+app.post('/sell', async (req,res) => {
+    const { sellID } = req.body;
+    const client = await db.connect();
+
+    try {
+        await client;
+        await db.sell(sellID);
+
+        const results = await db.getAll();
+
+        const apartmentsObject = {};
+        results.forEach(apartment => {
+            apartmentsObject[apartment.номер] = apartment;
+        });
+        const existingApartments = JSON.parse(fs.readFileSync(savedCardsPath, 'utf8'));
+        for (const key in existingApartments) {
+            if (!apartmentsObject[key]) {
+                delete existingApartments[key];
+            }
+        }
+        fs.writeFileSync(savedCardsPath, JSON.stringify(existingApartments, null, 2), {
+            encoding: 'utf8',
+            flag: 'w'
+        });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    } finally {
+        if (client) {
+            await db.disconnect();
+        }
+    }
+})
+app.post('/unBook', async (req, res) => {
+    const { unBookApartmentID } = req.body;
+    const client = await db.connect();
+
+    try {
+        await client;
+        await db.unBook(unBookApartmentID);
+
+        const results = await db.getAll();
+
+        const apartmentsObject = {};
+        results.forEach(apartment => {
+            apartmentsObject[apartment.номер] = apartment;
+        });
+        const existingApartments = JSON.parse(fs.readFileSync(savedCardsPath, 'utf8'));
+        for (const key in existingApartments) {
+            if (!apartmentsObject[key]) {
+                delete existingApartments[key];
+            }
+        }
+        fs.writeFileSync(savedCardsPath, JSON.stringify(existingApartments, null, 2), {
+            encoding: 'utf8',
+            flag: 'w'
+        });
+    } catch (error) {
+        console.error('Error:', error);
         res.status(500).json({ error: 'Internal server error' });
     } finally {
         if (client) {
@@ -178,7 +267,7 @@ app.post('/addData', async (req, res) => {
             results.forEach(apartment => {
                 apartmentsObject[apartment.номер] = apartment;
             });
-            fs.writeFileSync(__dirname + '/files/savedCards.json', JSON.stringify(apartmentsObject), { encoding: 'utf8', flag: 'w' });
+            fs.writeFileSync(savedCardsPath, JSON.stringify(apartmentsObject), { encoding: 'utf8', flag: 'w' });
         } else {
             console.log('No rows returned from the query.');
         }
@@ -194,11 +283,7 @@ app.post('/addData', async (req, res) => {
     res.json({ message: 'Data added successfully', newData });
 });
 
-
 app.listen(port, () => {
     db.createTable().then(r => db.disconnect());
     console.log(`Server is running on ${port}`);
 });
-
-
-

@@ -59,7 +59,7 @@ class Database {
             const query = `
             INSERT INTO квартира (номер, здание, подъезд, этаж, квадратура, комнаты, стоимость, статус, image)
             VALUES
-            ('${apartment}', '${house}', ${entrance}, ${floor}, ${quadrature}, ${rooms}, ${cost}, \'Активно\', '${image}');
+            (${apartment}, '${house}', ${entrance}, ${floor}, ${quadrature}, ${rooms}, ${cost}, \'Активно\', '${image}');
         `;
             await this.client.query(query);
             console.log('Квартира загружена');
@@ -91,99 +91,70 @@ class Database {
                 conditions.push(`здание = \'${queryParams[0]}\'`);
                 queryParams.pop();
             } else {
-                queryParams.push(house);
-                conditions.push('здание = ALL (SELECT DISTINCT здание FROM квартира)');
-                queryParams.pop()
             }
             if (roomsLess != '') {
                 queryParams.push(roomsLess);
                 conditions.push(`комнаты >= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(roomsLess);
-                conditions.push('комнаты = ALL (SELECT DISTINCT комнаты FROM квартира)');
-                queryParams.pop();
             }
             if (roomsMore != '') {
                 queryParams.push(roomsMore);
                 conditions.push(`комнаты <= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(roomsMore);
-                conditions.push('комнаты = ALL (SELECT DISTINCT комнаты FROM квартира)');
-                queryParams.pop();
             }
             if (floorLess != '') {
                 queryParams.push(floorLess);
                 conditions.push(`этаж >= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(floorLess);
-                conditions.push('этаж = ALL (SELECT DISTINCT этаж FROM квартира)');
-                queryParams.pop();
             }
             if (floorMore != '') {
                 queryParams.push(floorMore);
                 conditions.push(`этаж <= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(floorMore);
-                conditions.push('этаж = ALL (SELECT DISTINCT этаж FROM квартира)');
-                queryParams.pop();
             }
             if (areaLess != '') {
                 queryParams.push(areaLess);
                 conditions.push(`квадратура >= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(areaLess);
-                conditions.push('квадратура = ALL (SELECT DISTINCT квадратура FROM квартира)');
-                queryParams.pop();
             }
             if (areaMore != '') {
                 queryParams.push(areaMore);
                 conditions.push(`квадратура <= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(areaMore);
-                conditions.push('квадратура = ALL (SELECT DISTINCT квадратура FROM квартира)');
-                queryParams.pop();
             }
             if (costLess != '') {
                 queryParams.push(costLess);
                 conditions.push(`стоимость >= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(costLess);
-                conditions.push('стоимость = ALL (SELECT DISTINCT стоимость FROM квартира)');
-                queryParams.pop();
             }
             if (costMore != '') {
                 queryParams.push(costMore);
                 conditions.push(`стоимость <= ${queryParams[0]}`);
                 queryParams.pop();
             } else {
-                queryParams.push(costMore);
-                conditions.push('стоимость = ALL (SELECT DISTINCT стоимость FROM квартира)');
-                queryParams.pop();
             }
             if (apartmentEqual != '') {
                 queryParams.push(apartmentEqual);
-                conditions.push(`номер = ${queryParams[0]}`);
+                conditions.push(`номер = ${apartmentEqual}`);
                 queryParams.pop();
             } else {
-                queryParams.push(apartmentEqual);
-                conditions.push('номер = ALL (SELECT DISTINCT номер FROM квартира)');
-                queryParams.pop();
             }
             if (status !== '') {
                 queryParams.push(status);
                 conditions.push(`статус = \'${queryParams[0]}\'`);
                 queryParams.pop();
             } else {
-                queryParams.push(status);
-                conditions.push('статус = ALL (SELECT DISTINCT статус FROM квартира)');
-                queryParams.pop();
+            }
+
+            if (house !== '' && roomsLess != '' && roomsMore != '' && floorLess != '' && floorMore != '' && areaLess != '' && areaMore != '' && costLess != '' && costMore != '' && apartmentEqual != '') {
+                return this.getAll();
             }
 
             const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
@@ -206,11 +177,38 @@ class Database {
     }
 
     async book(apartment) {
-        const query = 'Update квартира\n' +
-            'set статус = \'Забронировано\'\n' +
-            `where номер = ${apartment};`
-        const result = await this.client.query(query);
-        return result.rows;
+        const query = 'UPDATE квартира SET статус = $1 WHERE номер = $2';
+        const values = ['Забронировано', apartment];
+        try {
+            const result = await this.client.query(query, values);
+            console.log('Apartment booked successfully!', result);
+        } catch (error) {
+            console.error('Error booking apartment:', error);
+            throw error;
+        }
+    }
+    async unBook(apartment) {
+        const query = 'UPDATE квартира SET статус = $1 WHERE номер = $2';
+        const values = ['Активно', apartment];
+        try {
+            const result = await this.client.query(query, values);
+            console.log('Apartment unbooked successfully!', result);
+        } catch (error) {
+            console.error('Error on unbooking apartment:', error);
+            throw error;
+        }
+    }
+
+    async sell(apartment) {
+        const query = 'UPDATE квартира SET статус = $1 WHERE номер = $2';
+        const values = ['Продано', apartment];
+        try {
+            const result = await this.client.query(query, values);
+            console.log('Apartment unbooked successfully!', result);
+        } catch (error) {
+            console.error('Error on unbooking apartment:', error);
+            throw error;
+        }
     }
 
     async disconnect() {
